@@ -70,15 +70,6 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1a1c20 !
 .kpi-card.reliability::before { background: #3a8fb5; }
 .kpi-card.reputability::before { background: #9b5fcf; }
 .kpi-card.growth::before { background: #2e9c6e; }
-.kpi-card.growth {
-    text-align: center;
-}
-.kpi-card.growth .kpi-label,
-.kpi-card.growth .kpi-value,
-.kpi-card.growth .kpi-band {
-    margin-left: auto;
-    margin-right: auto;
-}
  
 .kpi-label {
     font-family: 'DM Mono', monospace;
@@ -90,7 +81,7 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1a1c20 !
 }
 .kpi-value {
     font-family: 'Playfair Display', serif;
-    font-size: 5.2rem;
+    font-size: 2.8rem;
     font-weight: 900;
     line-height: 1;
     margin-bottom: 0.3rem;
@@ -121,9 +112,6 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1a1c20 !
     border: 1px solid #e8e8e6;
     border-radius: 12px;
     padding: 1.5rem;
-}
-.stage-profile-offset {
-    margin-top: 44px;
 }
 .stage-row {
     display: flex;
@@ -160,11 +148,11 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1a1c20 !
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.7rem 1.45rem;
-    border-radius: 10px;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
     font-family: 'DM Mono', monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
@@ -174,18 +162,8 @@ h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1a1c20 !
 .badge-default    { background: #f8f9fa; border: 1px solid #dee2e6; color: #495057; }
  
 .badge-desc {
-    font-size: 1.05rem;
-    color: #000000;
-    font-weight: 700;
-    white-space: nowrap;
-}
-.status-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 0.8rem;
-    margin-top: 1.25rem;
-    white-space: nowrap;
+    font-size: 0.82rem;
+    color: #666660;
 }
  
 /* ── Section headers ── */
@@ -567,65 +545,8 @@ def gauge_chart(value, title, color):
         title=dict(text=title, font=dict(size=11, family='DM Mono', color='#7a8399'), x=0.5, y=0.95),
     )
     return fig
-
-
-def sigmoid_position_chart(value):
-    x = np.linspace(0, 100, 400)
-    k = 0.12
-    y = 1 / (1 + np.exp(-k * (x - 50)))
-    y_val = 1 / (1 + np.exp(-k * (value - 50)))
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=x,
-        y=y,
-        mode="lines",
-        line=dict(color="#9aa3b2", width=3),
-        hoverinfo="skip",
-    ))
-    fig.add_trace(go.Scatter(
-        x=[value],
-        y=[y_val],
-        mode="markers",
-        marker=dict(size=16, color="#1e7d54", line=dict(color="#ffffff", width=3)),
-        hovertemplate="Growth Index: %{x:.1f}<extra></extra>",
-    ))
-    fig.add_annotation(
-        x=value,
-        y=y_val,
-        text="<b>You are here</b>",
-        showarrow=True,
-        arrowhead=2,
-        arrowsize=1,
-        arrowwidth=1.5,
-        arrowcolor="#1e7d54",
-        ax=65,
-        ay=-35,
-        font=dict(size=12, color="#1e7d54", family="DM Sans"),
-        bgcolor="rgba(255,255,255,0.85)",
-        bordercolor="#1e7d54",
-        borderwidth=1,
-    )
-    fig.update_layout(
-        paper_bgcolor=PLOTLY_THEME["paper_bgcolor"],
-        plot_bgcolor=PLOTLY_THEME["plot_bgcolor"],
-        font=PLOTLY_THEME["font"],
-        height=238,
-        margin=dict(l=30, r=10, t=12, b=28),
-        xaxis=dict(range=[0, 100], title="Growth Index", gridcolor="#eceff3", zeroline=False),
-        yaxis=dict(
-            range=[0, 1],
-            title="Maturity Momentum",
-            gridcolor="#f1f3f5",
-            zeroline=False,
-            tickvals=[0, 0.25, 0.5, 0.75, 1.0],
-            ticktext=["0", "0.25", "0.5", "0.75", "1.0"],
-        ),
-        showlegend=False,
-    )
-    return fig
-
-
+ 
+ 
 def scatter_chart(results, current_row):
     results = results.copy()
     results['Band'] = results['Growth_Index'].apply(lambda v: get_band(v)[0])
@@ -762,7 +683,7 @@ def stage_bar_html(row):
             f'<span class="stage-val">{val:.2f}</span>'
             f'</div>'
         )
-    return f'<div class="stage-bar-wrap stage-profile-offset">{bars}</div>'
+    return f'<div class="stage-bar-wrap">{bars}</div>'
  
  
 def alert_html(cls, title, body):
@@ -772,41 +693,24 @@ def alert_html(cls, title, body):
         {body}
     </div>
     """
+ 
+ 
+def question_grid_html(row):
+    cells = ""
+    for i in range(1, 21):
+        score  = row[f'S{i}']
+        color  = score_to_color(score)
+        cells += (
+            f'<div class="q-cell">'
+            f'<div class="q-num">Q{i}</div>'
+            f'<div class="q-score" style="color:{color};">{score:.0f}</div>'
+            f'<div class="q-dot" style="background:{color};"></div>'
+            f'</div>'
+        )
+    return f'<div class="q-grid">{cells}</div>'
+ 
+ 
 
-
-def score_explanation_html():
-    return (
-        '<div class="explain-wrap">'
-        '<div class="explain-head">Teacher&#39;s Individual Dashboard</div>'
-        '<div class="explain-sub">How Your Scores Are Calculated</div>'
-        '<div class="explain-grid">'
-        '<div class="explain-card exp-rel">'
-        '<h4>Relevance</h4>'
-        '<ul>'
-        '<li>The school meets the immediate needs of parents and students.</li>'
-        '<li>The focus is on curriculum alignment, compliance, visibility, and initial trust-building.</li>'
-        '<li>The school has a unique value proposition that differentiates from other schools.</li>'
-        '</ul>'
-        '</div>'
-        '<div class="explain-card exp-reli">'
-        '<h4>Reliability</h4>'
-        '<ul>'
-        '<li>Parents and the community trust that the school delivers consistently year after year.</li>'
-        '<li>This means strong academic outcomes, defined SOPs, teacher stability, and structured parent engagement.</li>'
-        '<li>The school innovates and has created a system that can be scaled by empowering middle leaders, embedding technology, and maintaining quality across larger student numbers.</li>'
-        '</ul>'
-        '</div>'
-        '<div class="explain-card exp-repu">'
-        '<h4>Reputability</h4>'
-        '<ul>'
-        '<li>The school is recognized at state, national, or international levels.</li>'
-        '<li>The school engages in legacy-building initiatives such as research, publications, alumni networks, awards, and collaborations.</li>'
-        '<li>Parents choose the school because it is seen as a benchmark of excellence.</li>'
-        '</ul>'
-        '</div>'
-        '</div>'
-        '</div>'
-    )
 
 
 def growth_stage_focus_html():
@@ -1083,24 +987,23 @@ else:
                     color: #e8e4dc; line-height: 1.1; margin-bottom: 0.6rem;'>
             {user_choice}
         </div>
-    </div>
-    """, unsafe_allow_html=True)
- 
-    # ════════════════════════════════════
-    #  KPI + POSITION CURVE
-    # ════════════════════════════════════
-    k_left, k_right = st.columns([1, 1.45])
-    with k_left:
-        st.markdown(kpi_card("Growth Index", row['Growth_Index'], "growth", "growth"), unsafe_allow_html=True)
-    with k_right:
-        st.plotly_chart(sigmoid_position_chart(row['Growth_Index']), use_container_width=True)
-
-    st.markdown(f"""
-    <div class="status-row">
         <span class="status-badge {badge_cls}">{label}</span>
         <span class="badge-desc">{desc}</span>
     </div>
     """, unsafe_allow_html=True)
+ 
+    # ════════════════════════════════════
+    #  KPI ROW
+    # ════════════════════════════════════
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.markdown(kpi_card("Growth Index",     row['Growth_Index'],    "growth",      "growth"),      unsafe_allow_html=True)
+    with c2:
+        st.markdown(kpi_card("Relevance",        row['Relevance'],       "relevance",   "relevance"),   unsafe_allow_html=True)
+    with c3:
+        st.markdown(kpi_card("Reliability (Adj)", row['Reliability_Adj'], "reliability", "reliability"), unsafe_allow_html=True)
+    with c4:
+        st.markdown(kpi_card("Reputability (Adj)", row['Reputability_Adj'], "reputability", "reputability"), unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1118,8 +1021,8 @@ else:
         st.plotly_chart(gauge_chart(row['Reputability_Adj'], "REPUTABILITY (ADJ)", "#b87ae0"), use_container_width=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
-
     st.markdown(score_explanation_html(), unsafe_allow_html=True)
+    st.markdown(growth_stage_focus_html(), unsafe_allow_html=True)
 
     # ════════════════════════════════════
     #  SECTION 2 — Stage Profile + Radar
@@ -1132,8 +1035,6 @@ else:
     with col_b:
         st.plotly_chart(radar_chart(row), use_container_width=True)
 
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown(growth_stage_focus_html(), unsafe_allow_html=True)
     st.markdown("<hr>", unsafe_allow_html=True)
  
     # ── Footer
